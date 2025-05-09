@@ -5,7 +5,7 @@ export function calculatePaymentSchedule(loan: LoanData): PaymentScheduleData[] 
   const { amount, term, annualRate, startDate } = loan
 
   // Convertir tasa anual a mensual
-  const monthlyRate = annualRate / 10 / 12
+  const monthlyRate = annualRate / 100 / 12
 
   // Calcular cuota mensual usando el método francés
   // Fórmula: C = P * (r * (1 + r)^n) / ((1 + r)^n - 1)
