@@ -286,15 +286,11 @@ export function LoanFormWithSearch({ onLoanGenerated, currentUser }: LoanFormWit
                   disabled={!!clientData || isSearching}
                   className="flex-1"
                 />
-                {!clientData ? (
-                  <Button onClick={handleSearch} disabled={isSearching}>
-                    {isSearching ? "Buscando..." : "Buscar"}
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={handleClearClient}>
-                    Cambiar Cliente
-                  </Button>
-                )}
+               {!clientData && (
+  <Button onClick={handleSearch} disabled={isSearching}>
+    {isSearching ? "Buscando..." : "Buscar"}
+  </Button>
+)}
               </div>
 
               {documentError && (
