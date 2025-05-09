@@ -1,0 +1,81 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo para los clientes
+model Client {
+  id              String  @id @default(uuid()) // ID único del cliente
+  tipoPersona     String // "natural" o "juridica"
+  tipoDocumento   String // "DNI" o "RUC"
+  numeroDocumento String  @unique // Número de documento, debe ser único
+  nombre          String // Nombre completo o Razón Social
+  // Opcional: campos separados para personas naturales si los mapeas de apiperu.dev
+  nombres         String?
+  apellidoPaterno String?
+  apellidoMaterno String?
+  // Opcional: campos para personas jurídicas
+  razonSocial     String?
+  representanteLegal String?
+
+  direccion       String? // Dirección del cliente (puede venir de API o ser manual)
+  correo          String? // Correo del cliente (puede venir de API o ser manual)
+  telefono        String? // Teléfono del cliente
+
+  createdAt       DateTime @default(now()) // Fecha de creación del registro
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  loans           Loan[] // Relación con los préstamos que tiene este cliente
+
+  @@map("clients") // Nombre de la tabla en la base de datos
+}
+
+// Modelo para los préstamos
+model Loan {
+  id                String    @id @default(uuid()) // ID único del préstamo
+  amount            Float // Monto del préstamo
+  term              Int // Plazo en meses
+  annualRate        Float // Tasa de interés anual
+  startDate         DateTime // Fecha de inicio del préstamo
+
+  clientId          String // ID del cliente relacionado
+  client            Client    @relation(fields: [clientId], references: [id]) // Relación con el modelo Client
+
+  createdAt         DateTime  @default(now())
+  createdBy         String // ID del usuario que creó el préstamo
+
+  isCompleted       Boolean   @default(false) // Estado del préstamo (completado o no)
+  status            String    @default("pending") // Estado del préstamo (pendiente, aprobado, rechazado, etc.)
+
+  // Podrías añadir un modelo separado para el cronograma de pagos
+  // paymentSchedule   Payment[] // Relación con las cuotas de pago
+
+  @@map("loans") // Nombre de la tabla en la base de datos
+}
+
+// Ejemplo de un modelo para el cronograma de pagos (opcional)
+/*
+model Payment {
+  id                String    @id @default(uuid())
+  loanId            String // ID del préstamo al que pertenece esta cuota
+  loan              Loan      @relation(fields: [loanId], references: [id]) // Relación con el modelo Loan
+
+  paymentNumber     Int // Número de cuota
+  paymentDate       DateTime // Fecha de vencimiento de la cuota
+  monthlyPayment    Float // Monto total de la cuota
+  principal         Float // Amortización a capital
+  interest          Float // Interés de la cuota
+  remainingBalance  Float // Saldo pendiente después de esta cuota
+
+  isPaid            Boolean   @default(false) // Indica si la cuota ha sido pagada
+  paidAt            DateTime? // Fecha en que se pagó la cuota
+
+  @@map("payments") // Nombre de la tabla
+}
+*/
