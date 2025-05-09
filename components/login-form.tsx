@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
-import { login } from "@/lib/auth"
+import { changePassword, login } from "@/lib/auth"
 import { ArrowLeft } from "lucide-react"
 
 interface LoginFormProps {
@@ -101,29 +101,30 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsLoading(true)
 
     try {
-      // En esta versión simplificada, solo mostramos un mensaje de éxito
-      // En una implementación real, llamaríamos a una API para cambiar la contraseña
+      // Llamada a la función de cambio de contraseña
+      const authState = await changePassword(username, currentPassword, newPassword)
+
       toast({
         title: "Éxito",
-        description: "Por favor contacte al administrador para cambiar su contraseña",
+        description: "Contraseña cambiada con éxito",
       })
 
       // Limpiar formulario y volver a login
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
-      setShowChangePassword(false)
+      setShowChangePassword(false) // Ocultar formulario de cambio de contraseña
+
     } catch (error) {
       toast({
         title: "Error",
-        description: "Ocurrió un error al cambiar la contraseña",
+        description: error instanceof Error ? error.message : "Ocurrió un error al cambiar la contraseña",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
   }
-
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">

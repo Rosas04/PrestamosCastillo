@@ -268,6 +268,47 @@ export async function login(username: string, password: string): Promise<AuthSta
   })
 }
 
+export async function changePassword(username: string, currentPassword: string, newPassword: string): Promise<AuthState> {
+  // Inicializa los usuarios si no existen
+  initializeUsers()
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const user = getUserByUsername(username)
+
+      if (!user) {
+        reject(new Error("Usuario no encontrado"))
+        return
+      }
+
+      if (user.password !== currentPassword) {
+        reject(new Error("La contraseña actual es incorrecta"))
+        return
+      }
+
+      if (newPassword.length < 6) {
+        reject(new Error("La nueva contraseña debe tener al menos 6 caracteres"))
+        return
+      }
+
+      // Actualizar la contraseña del usuario
+      updateUser(user.id, { password: newPassword }) 
+
+      // Regresar estado actualizado
+      const authState: AuthState = {
+        user,
+        isAuthenticated: true,
+        permissions: rolePermissionsMap[user.role], // Mantenemos los permisos existentes
+      }
+
+      // Actualizar el estado de autenticación en localStorage
+      localStorage.setItem("auth_state", JSON.stringify(authState))
+
+      resolve(authState)
+    }, 800)
+  })
+}
+
 // Check if user is authenticated
 export async function isAuthenticated(): Promise<AuthState> {
   return new Promise((resolve) => {
@@ -321,7 +362,7 @@ export function logout(): void {
 }
 
 // Change password
-export async function changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+/*export async function changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const user = getUserById(userId)
@@ -340,7 +381,7 @@ export async function changePassword(userId: string, currentPassword: string, ne
       resolve(true)
     }, 800)
   })
-}
+}*/
 
 // Check if user has permission
 export function hasPermission(
